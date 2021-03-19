@@ -1,50 +1,44 @@
+package com.meritamerica.assignment4;
+//package com.meritamerica.assignment4;
 
-package com.meritamerica.assignment3;
+import java.util.ArrayList;
+import java.util.Arrays;
 
-import java.text.*;
-
-public class CDOffering 
-{
-	CDOffering cdOffering = CDOffering.readFromString();
-	private int term;
-	private double interestRate;
+public class CDOffering {
 	
-	CDOffering(int term, double interestRate)
-	{
-		this.term = term;
+	double interestRate;
+	int terms;
+	
+	public CDOffering(int terms, double interestRate){
+		this.terms = terms;
 		this.interestRate = interestRate;
 	}
-	
-	private static CDOffering readFromString() {
-		// TODO Auto-generated method stub
-		return null;
+
+	int getTerm(){
+		return terms;
 	}
-
-	int getTerm(){return term;}
 	
-	double getInterestRate(){return interestRate;}
-	
-	// ---------------------- FINISH ------------//   		//expecting like this: 1,0.018
-
-	public static CDOffering readFromString(String cdOfferingDataString) throws java.lang.NumberFormatException{
-		CDOffering cd = null;
-
-		if(cdOfferingDataString.indexOf(',')!=-1) {
-			int term = Integer.parseInt(cdOfferingDataString.substring(0, cdOfferingDataString.indexOf(',')));  
-			double rate = Double.parseDouble(cdOfferingDataString.substring(cdOfferingDataString.indexOf(',')+1));
-			cd = new CDOffering(term,rate);
-		} 
-		else {
-			throw new NumberFormatException();
-		}
-
-		return cd;
+	double getInterestRate(){
+		return interestRate;
 	}
-
-	String writeToString()
+	
+	static CDOffering readFromString(String cdOfferingDataString)
 	{
-		String tempTerm = String.valueOf(term), tempIntRate = String.valueOf(interestRate);		
-		return tempTerm + "," + tempIntRate;
+		CDOffering cdo;
+		
+		try
+		{
+			ArrayList<String> x = new ArrayList<>(Arrays.asList(cdOfferingDataString.split(",")));
+			int terms = Integer.parseInt(x.get(0));
+			double ir = Double.parseDouble(x.get(1));
+			cdo = new CDOffering(terms, ir);
+		}
+		catch(Exception ex)
+		{
+			throw new java.lang.NumberFormatException();
+		}
+		
+		return cdo;
 	}
 
 }

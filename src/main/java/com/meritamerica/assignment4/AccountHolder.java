@@ -1,264 +1,312 @@
-package com.meritamerica.assignment3;
+package com.meritamerica.assignment4;
+//package com.meritamerica.assignment4;
 
-
-
-import java.io.BufferedReader;
-import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.StringTokenizer;
+import java.util.Arrays;
 
-public class AccountHolder implements Comparable<AccountHolder>
-{
-	/*INSTANCE VARIABLES*/
-	
-	private static final double BALANCE_LIMIT = 250000;
+public class AccountHolder implements Comparable<AccountHolder> {
+	// Class variables
 	private String firstName;
 	private String middleName;
 	private String lastName;
 	private String ssn;
-	protected static BufferedReader br;
-	private CheckingAccount[] checkingAccountList = new CheckingAccount[10];
-	private SavingsAccount[] savingsAccountList = new SavingsAccount[10];
-	private CDAccount[] cdAccountList = new CDAccount[10];
-	
-		
-	/*METHODS*/	
-	AccountHolder(
-			String firstName,
-			String middleName,
-			String lastName,
-			String ssn			
-			)
-	{
-		this.firstName = firstName;		
-		this.middleName = middleName;
-		this.lastName = lastName;
+	ArrayList<CheckingAccount> checkingArray = new ArrayList<CheckingAccount>();
+	ArrayList<SavingsAccount> savingsArray = new ArrayList<SavingsAccount>();
+	ArrayList<CDAccount> cdAccountArray = new ArrayList<CDAccount>();
+
+	/**
+	 * This constructs account holder's attributes
+	 * 
+	 * @param first  the first name of the account holder
+	 * @param middle the middle name of the account holder
+	 * @param last   the last name of the account holder
+	 * @param ssn    the social security number of the account holder
+	 */
+	public AccountHolder(String first, String middle, String last, String ssn) {
+		this.firstName = first;
+		this.middleName = middle;
+		this.lastName = last;
 		this.ssn = ssn;
-		
 	}
-		
-	/* GETTERS/SETTERS */
-	String getFirstName(){return firstName;}
-	void setFirstName(String firstName){this.firstName = firstName;}
-	
-	String getMiddleName(){return middleName;}
-	void setMiddleName(String middleName){this.middleName = middleName;}
-	
-	String getLastName(){return lastName;}
-	void setLastName(String lastName){this.lastName = lastName;}
-	
-	String getSSN(){return ssn;}
-	void setSSN(String ssn){this.ssn = ssn;}
-	
-	double getCombinedBalance(){return getCheckingBalance() + getSavingsBalance() + getCDBalance();}
-	
-	/* CHECKING ACCOUNT */
-	CheckingAccount addCheckingAccount(double openingBalance)
-	{
-		if((openingBalance + (getCombinedBalance() - getCDBalance()) < BALANCE_LIMIT))
-		{
-			return addCheckingAccount(new CheckingAccount(openingBalance));
-		}		
-		return null;
-	}
-	
-	CheckingAccount addCheckingAccount(CheckingAccount checkingAccount)
-	{
-		if((checkingAccount.getBalance() + (getCombinedBalance() - getCDBalance()) < BALANCE_LIMIT))
-		{
-			for(int i = 0; i < checkingAccountList.length; i++)
-			{
-				if(checkingAccountList[i] == null)
-				{
-					checkingAccountList[i] = checkingAccount;
-					break;
-				}
+
+	/**
+	 * This method validates that aggregate account balances are less than
+	 * $250,000.00 and add checking account to account holder by taking opening
+	 * balance as parameter
+	 * 
+	 * @param openingBalance Account holder's initial opening balance
+	 * @return
+	 * @throws Exception 
+	 */
+	public CheckingAccount addCheckingAccount(double openingBalance) throws ExceedsCombinedBalanceLimitException {
+
+		try {
+			if (openingBalance >=250000) {
+				throw ExceedsCombinedBalanceLimitException("Total deposit exceeds the $250,000 cap.");
 			}
+			
+			if (getCheckingBalance() + getSavingsBalance() + openingBalance >= 250000) {
+				throw ExceedsCombinedBalanceLimitException("Combined balance limit exeeds $250,000.");
+			}
+		
+			CheckingAccount chk = new CheckingAccount(0, .0001);
+			DepositTransaction depositTransaction = new DepositTransaction(chk, openingBalance);
+			MeritBank.processTransaction(depositTransaction);
+			return chk;
+	
+		} catch (ExceedsCombinedBalanceLimitException e) {
+
+		} catch (Exception e) {
+			System.out.println("Your combined balance limit has been reached.");
+		}
+		CheckingAccount chk = new CheckingAccount(0, .0001);
+		return chk;
+	}
+
+
+	/**
+	 * This method used to add checking account to account holder by validating
+	 * aggregate balances are less than $250,000.00
+	 * 
+	 * @param checkingAccount checking account amount
+	 */
+	public CheckingAccount addCheckingAccount(CheckingAccount checkingAccount) throws ExceedsCombinedBalanceLimitException {
+		
+		try {
+			if (checkingAccount.getBalance() + getCheckingBalance() + getSavingsBalance() >= 250000) {
+				System.out.println("Unable to open Checking Account. Combined balance exceeds the $250,000 cap.");
+				throw ExceedsCombinedBalanceLimitException("Total deposit exceeds the $250,000 cap.");
+			}
+			checkingArray.add(checkingAccount);
+				
+		} catch (ExceedsCombinedBalanceLimitException e) {
+			System.out.println("Reached combined balance limit.");
+		
+		} catch (Exception e) {
+			System.out.println("Reached combined balance limit.");
 		}
 		return checkingAccount;
 	}
-	
-	CheckingAccount[] getCheckingAccounts() 
-	{
-		return checkingAccountList;
-	}
-	
-	int getNumberOfCheckingAccounts()
-	{
-		int numOfAccounts = 0;
-		for(CheckingAccount i: checkingAccountList)
-		{
-			if(i != null)
-			{
-				numOfAccounts++;
-			}
+
+	/**
+	 * This method calculates the aggregate balance of checking accounts
+	 * 
+	 * @return the total amount of the checking accounts
+	 */
+	public double getCheckingBalance() {
+		double total = 0.0;
+		int i;
+		for (i = 0; i < checkingArray.size(); i++) {
+			total += checkingArray.get(i).getBalance();
 		}
-		return numOfAccounts;
+		return total;
 	}
-	
-	double getCheckingBalance()
-	{
-		double sum = 0;
-		for(int i = 0; i < checkingAccountList.length + 1; i++)
-		{
-			if(checkingAccountList[i] == null)
-			{
-				break;
+
+	/**
+	 * This method adds savings account to account holder by validating the
+	 * aggregate balance is less than $250,000.00
+	 * 
+	 * @param openingBalance the initial opening balance of the saving account
+	 */
+	public SavingsAccount addSavingsAccount(double openingBalance) throws ExceedsCombinedBalanceLimitException {
+//			DepositTransaction depositTransaction = new DepositTransaction(null, 1000);
+
+		try {
+			if (openingBalance >=250000) {
+				throw ExceedsCombinedBalanceLimitException("Total deposit exceeds the $250,000 cap.");
 			}
-			sum += checkingAccountList[i].getBalance();
+
+			if (getCheckingBalance() + getSavingsBalance() + openingBalance >= 250000) {
+				System.out.println("Combined balance limit exeeds $250,000.");
+				throw ExceedsCombinedBalanceLimitException("Combined balance limit exeeds $250,000.");
+			}
+			
+			SavingsAccount sav = new SavingsAccount(0, .0001);
+			DepositTransaction depositTransaction = new DepositTransaction(sav, openingBalance);
+			MeritBank.processTransaction(depositTransaction);
+			return sav;
+			
+		} catch (ExceedsCombinedBalanceLimitException e) {
+
+		} catch (Exception e) {
+			System.out.println("Your combined balance limit has been reached.");
 		}
-		return sum;
+		SavingsAccount sav = new SavingsAccount(openingBalance, .01);
+		return sav;
 	}
-	
-	/* SAVINGS ACCOUNT */
-	SavingsAccount addSavingsAccount(double openingBalance)
-	{
-		if((openingBalance + (getCombinedBalance() - getCDBalance()) < BALANCE_LIMIT))
-				{
-					return addSavingsAccount(new SavingsAccount(openingBalance));
-				}		
-		return null;
-	}	
-	
-	SavingsAccount addSavingsAccount(SavingsAccount savingsAccount)
-	{
-		if((savingsAccount.getBalance() + (getCombinedBalance() - getCDBalance()) < BALANCE_LIMIT))
-		{
-			for(int i = 0; i < savingsAccountList.length; i++)
-			{
-				if(savingsAccountList[i] == null)
-				{
-					savingsAccountList[i] = savingsAccount;
-					break;
-				}
+
+	/**
+	 * This method validates account balance is less than $250,00.00 and adds
+	 * savings account to account holder
+	 * 
+	 * @param savingsAccount the savings account amount
+	 */
+	public SavingsAccount addSavingsAccount(SavingsAccount savingsAccount) throws ExceedsCombinedBalanceLimitException {
+
+		try {
+			if (savingsAccount.getBalance() + getCheckingBalance() + getSavingsBalance() >= 250000) {
+				System.out.println("Unable to open Savings Account. Combined balance exceeds the $250,000 cap.");
+				throw ExceedsCombinedBalanceLimitException("Total deposit exceeds the $250,000 cap.");
 			}
+			savingsArray.add(savingsAccount);
+			
+		} catch (ExceedsCombinedBalanceLimitException e) {
+			System.out.println("Reached combined balance limit.");
+	
+		} catch (Exception e) {
+			System.out.println("Reached combined balance limit.");
 		}
 		return savingsAccount;
 	}
-	
-	SavingsAccount[] getSavingsAccounts()
-	{
-		return savingsAccountList;
-	}
-	
-	int getNumberOfSavingsAccounts()
-	{
-		int numOfAccounts = 0;
-		for(SavingsAccount i: savingsAccountList)
-		{
-			if(i != null)
-			{
-				numOfAccounts++;
-			}
-		}
-		return numOfAccounts;
-	}
-	
-	double getSavingsBalance()
-	{
-		double sum = 0;
-		for(int i = 0; i < savingsAccountList.length + 1; i++)
-		{
-			if(savingsAccountList[i] == null)
-			{
-				break;
-			}
-			sum += savingsAccountList[i].getBalance();
-		}
-		return sum;
-	}
-	
-	/* CD ACCOUNT */
-	CDAccount addCDAccount(CDOffering offering, double openingBalance)
-	{
-		if(MeritBank.getCDOfferings() == null)
-		{
-			return null;
-		} else {
-		return addCDAccount(new CDAccount(offering, openingBalance));
-		}
 
+	/**
+	 * @return the total balance in savings accounts
+	 */
+	public double getSavingsBalance() {
+		double total = 0.0;
+		for (SavingsAccount balance : savingsArray) {
+			total += balance.getBalance();
+		}
+		return total;
 
 	}
-	
-	CDAccount addCDAccount(CDAccount cdAccount)
-	{
-		if(cdAccountList == null)
-		{
-			return null;
+
+	/**
+	 * 
+	 * @return savings account
+	 */
+	public ArrayList<SavingsAccount> getSavingsAccounts() {
+		return savingsArray;
+	}
+
+	/**
+	 * @return the total number of savings accounts
+	 */
+	public int getNumberOfSavingsAccounts() {
+		return savingsArray.size();
+	}
+
+	/**
+	 * This method used to add CDAccount to the account holder
+	 * 
+	 * @param offering    the CDOffering
+	 * @param openingBalance the opening balance
+	 * @return
+	 * @throws ExceedsFraudSuspicionLimitException
+	 */
+	public CDAccount addCDAccount(CDOffering offering, double openingBalance) throws ExceedsFraudSuspicionLimitException {
+		if (openingBalance > 1000) {
+			throw new ExceedsFraudSuspicionLimitException("Exceeds balance limit.");
 		}
-		for(int i = 0; i < cdAccountList.length; i++)
-		{
-			if(cdAccountList[i] == null)
-			{
-				cdAccountList[i] = cdAccount;
-				break;
-			}
-		}
+
+		CDAccount newA = new CDAccount(offering, openingBalance);
+		return newA;
+	}
+
+	public CDAccount addCDAccount(CDAccount cdAccount) {
+		cdAccountArray.add(cdAccount);
 		return cdAccount;
 	}
-	
-	CDAccount[] getCDAccounts()
-	{
-		return cdAccountList;
-	}
-	
-	int getNumberOfCDAccounts()
-	{
-		int numOfAccounts = 0;
-		for(CDAccount i: cdAccountList)
-		{
-			if(i != null)
-			{
-				numOfAccounts++;
-			}			
-		}
-		return numOfAccounts;
-	}
-	
-	double getCDBalance()
-	{
-		double sum = 0;
-		for(int i = 0; i < cdAccountList.length + 1; i++)
-		{
-			if(cdAccountList[i] == null)
-			{
-				break;
-			}
-			sum += cdAccountList[i].getBalance();
-		}
-		return sum;
-	}
-	// ------------------- FINISH -------------//
-	public static AccountHolder readFromString(String accountHolderData) throws java.lang.Exception{
-		StringTokenizer tokenizer = new StringTokenizer(accountHolderData, ",");
 
-		String firstName = tokenizer.nextToken();
-		String middleName = "";
-		if (tokenizer.countTokens() == 4) {
-			middleName = tokenizer.nextToken();
-		}
-		String lastName = tokenizer.nextToken();
-		String ssn = tokenizer.nextToken();
-
-		AccountHolder account = new AccountHolder(firstName, middleName, lastName, ssn);
-		return account;
-	}
-	
-	public String writeToString() {
-		String acString = getFirstName()+","+getMiddleName()+","+getLastName()+","+getSSN();
-		return acString;
-	}
-
-	@Override
-	public int compareTo(AccountHolder o) {
+	private Exception ExceedsCombinedBalanceLimitException(String string) {
 		// TODO Auto-generated method stub
-		return 0;
+		return null;
 	}
-	//ArrayList is created for storing (1) all the savings account,(2) all the checking account,(3)all CDA account of an account holder
-	private ArrayList<SavingsAccount> savingsAccList = new ArrayList<SavingsAccount>();
-	private ArrayList<CheckingAccount> checkingAccList = new ArrayList<CheckingAccount>();
-	private ArrayList<CDAccount> cdAccList = new ArrayList<CDAccount>();
 
 	
+	
+	public ArrayList<CDAccount> getCDAccounts() {
+		return cdAccountArray;
 	}
+
+	public int getNumberOfCDAccounts() {
+		return cdAccountArray.size();
+	}
+
+	public double getCDBalance() {
+		double total = 0.0;
+		for (CDAccount balance : cdAccountArray) {
+			total += balance.getBalance();
+		}
+		return total;
+	}
+
+	public double getCombinedBalance() {
+		return getCDBalance() + getSavingsBalance() + getCheckingBalance();
+	}
+
+	public String getFirstName() {
+		return firstName;
+	}
+
+	public void setFirstName(String first) {
+		this.firstName = first;
+	}
+
+	public String getMiddleName() {
+		return middleName;
+	}
+
+	public void setMiddleName(String middle) {
+		this.middleName = middle;
+	}
+
+	public String getLastName() {
+		return lastName;
+	}
+
+	public void setLastName(String last) {
+		this.lastName = last;
+	}
+
+	public String getSSN() {
+		return ssn;
+	}
+
+	public void setSSN(String ssn) {
+		this.ssn = ssn;
+	}
+
+	public ArrayList<CheckingAccount> getCheckingAccounts() {
+		return checkingArray;
+	}
+
+	public int getNumberOfCheckingAccounts() {
+		return checkingArray.size();
+	}
+
+	static AccountHolder readFromString(String accountHolderData) throws Exception {
+		AccountHolder ah;
+		try {
+			ArrayList<String> x = new ArrayList<>(Arrays.asList(accountHolderData.split(",")));
+			ah = new AccountHolder(x.get(0), x.get(1), x.get(2), x.get(3));
+		} catch (Exception ex) {
+			throw new java.lang.Exception();
+		}
+		return ah;
+	}
+
+	public int compareTo(AccountHolder otherAccountHolder) {
+		double x = this.getCombinedBalance();
+		double y = otherAccountHolder.getCombinedBalance();
+		if (x == y) {
+			return 0;
+		} else if (this.getCombinedBalance() > otherAccountHolder.getCombinedBalance()) {
+			return 1;
+		} else {
+			return -1;
+		}
+
+	}
+
+}
+
+
+
+
+
+
+
+
+
+

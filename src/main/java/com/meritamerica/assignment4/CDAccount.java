@@ -1,77 +1,77 @@
-package com.meritamerica.assignment3;
+package com.meritamerica.assignment4;
+//package com.meritamerica.assignment4;
 
-import java.text.Format;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.StringTokenizer;
+import java.text.*;
+import java.util.*;
+
+//import chex.meritamerica.assignment4.CDOffering;
+//import chex.meritamerica.assignment4.MeritBank;
+
+//import com.meritamerica.assignment4.CDOffering;
+//import com.meritamerica.assignment4.MeritBank;
 
 public class CDAccount extends BankAccount {
-		
-		private CDOffering offering;
 
-		public CDAccount(CDOffering offering, double balance) {
-			
-			super(MeritBank.getNextAccountNumber(), balance,offering.getInterestRate(),new Date());
-			
-			this.offering=offering;
-		}
-		public CDAccount(long accountNumber, double balance, double interestRate,java.util.Date accountOpenedOn,int term) {
-			super(accountNumber,balance,interestRate,accountOpenedOn);
-			
-			this.offering = new CDOffering(term, interestRate);
-			
-		}
-		
-		public double getInterestRate() {
-			return this.offering.getInterestRate();
-		}
-		public int getTerm() {
-			return this.offering.getTerm();
-		}
-		public java.util.Date getStartDate(){
-			Date date=new Date();
-			return date;
-		}
-		public boolean withdraw(double amount) {
-			return false;
-		}
-		public boolean deposit(double amount) {
-			return false;
-		}
-		public double futureValue() {
-			
-			double futureVal = getBalance() * Math.pow((1+this.getInterestRate()),this.getTerm());
-			return futureVal;
-		}
-		public static CDAccount readFromString(String accountData) throws  java.lang.NumberFormatException{
-			StringTokenizer token = new StringTokenizer(accountData, ",");
-			int numAccount = Integer.parseInt(token.nextToken());
-			long balance = Long.parseLong(token.nextToken());
-			double rate = Double.parseDouble(token.nextToken());
-			
-			Date date = new Date(token.nextToken());
-			Format f = new SimpleDateFormat("dd/MM/yy");
-			String strDate = f.format(date);
-			 date = new Date(strDate);
-			
-			 int term = Integer.parseInt(token.nextToken());
+	CDOffering offerings;
+	int term;
 
-			CDAccount cdAcc = new CDAccount(numAccount, balance, rate, date, term);
-			return cdAcc;
-		}
-
-		public String writeToString() {
-			String cdString = getAccountNumber()+","+getBalance()+","+getInterestRate()+","+getStartDate()+","+getTerm(); 
-			return cdString;
-		}
-		
-		
-		
-	
-
-	
-		
+	public CDAccount(CDOffering offerings, double balance) {
+		super(balance, offerings.interestRate);
+		this.offerings = offerings;
 
 	}
-	
 
+	public CDAccount(long accountNumber, double balance, double interestRate, java.util.Date dateOpenedOn, int term) {
+		super(accountNumber, balance, interestRate, dateOpenedOn);
+		this.term = term;
+
+	}
+
+	public boolean withdraw(double amount) {
+		return false;
+	}
+
+	public boolean deposit(double amount) {
+		return false;
+	}
+
+	public long getAccountNumber() {
+		return accountNumber;
+
+	}
+
+	int getTerm() {
+		return term;
+	}
+
+	public double futureValue() throws NegativeAmountException, ExceedsFraudSuspicionLimitException {
+		
+		double recInterest = offerings.getInterestRate() + 1;
+		double recAmmount;
+		for (int i = 0; i < (offerings.getTerm()-1); i++) {
+			recInterest = recInterest * (offerings.getInterestRate() + 1);
+		}
+		
+
+		recAmmount = recInterest * balance;
+		return recAmmount;
+	}
+
+	static CDAccount readFromString(String accountData) throws ParseException {
+		CDAccount cda;
+
+		try {
+			ArrayList<String> x = new ArrayList<>(Arrays.asList(accountData.split(",")));
+			long acNum = Long.parseLong(x.get(0));
+			double b = Double.parseDouble(x.get(1));
+			double ir = Double.parseDouble(x.get(2));
+			Date date = formatter.parse(x.get(3));
+			int term = Integer.parseInt(x.get(4));
+			cda = new CDAccount(acNum, b, ir, date, term);
+		} catch (ParseException ex) {
+			throw new java.lang.NumberFormatException();
+		}
+		return cda;
+	}
+
+}
