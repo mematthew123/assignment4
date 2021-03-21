@@ -16,7 +16,7 @@ public class FraudQueue {
 //		fraud.addTransaction(amount);
 //	}
 //	
-	public Transaction getTransaction()
+	public static Transaction getTransaction()
 	{
 		Transaction fraudTransaction = fraud.get(0);
 		fraud.remove(0);

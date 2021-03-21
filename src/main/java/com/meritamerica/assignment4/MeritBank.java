@@ -15,6 +15,9 @@ public class MeritBank {
 	static CDOffering[] CDOfferingsArray = new CDOffering[0];
 
 	static boolean readFromFile(String fileName) {
+		
+		
+		
 		clearCDOfferings();
 		accountHolders = new AccountHolder[0];
 
@@ -101,22 +104,26 @@ public class MeritBank {
 
 		return true;
 	}
+
+	
+	// throws fraud exception for transactoions Write File
 	static boolean writeToFile(String fileName) {
-		 new HashSet<String>();
-	    try(Scanner sc = new Scanner(new FileReader(fileName))) {
-	      setNextAccountNumber(0); 
-	      setNextAccountNumber(Long.parseLong(sc.next()));
-	       
 		
 		
-		// TODO Should also write BankAccount transactions and the FraudQueue
-		return false;  } catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-			return false;
+        Transaction trans = FraudQueue.getTransaction();
+        ArrayList<Transaction> transList = new ArrayList<>();
+        while (trans != null){
+            transList.add(trans);
+            FraudQueue.getTransaction();		// TODO Should also write BankAccount transactions and the FraudQueue
+		return false;
+        }
+		return false;
 	}
 
+	
+
+	
+	
 	static void addAccountHolder(AccountHolder accountHolder) {
 		AccountHolder[] temp = Arrays.copyOf(accountHolders, accountHolders.length + 1);
 		accountHolders = temp;
@@ -201,7 +208,7 @@ public class MeritBank {
 		return futureValue;
 	}
 
-	static AccountHolder[] sortAccountHolders() {
+	static AccountHolder[] sortedAccountHolders() {
 		Arrays.sort(accountHolders);
 
 		return accountHolders;
