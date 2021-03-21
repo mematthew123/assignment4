@@ -6,7 +6,7 @@ import java.util.*;
 
 public class CheckingAccount extends BankAccount{
 
-	static double interestRate = .0001;
+	static double interestRate = 0.0001;
 	
 	public CheckingAccount(double openingBalance, double interestRate){
 		super(openingBalance, interestRate);

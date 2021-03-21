@@ -67,8 +67,8 @@ public abstract class BankAccount {
 	}
 
 	double futureValue(int years) {
-		double good = MeritBank.recursiveFutureValue(balance, years, interestRate);
-		return good;
+		double futValue = MeritBank.recursiveFutureValue(balance, years, interestRate);
+		return futValue;
 	}
 
 	public void addTransaction(Transaction transaction) {
@@ -79,13 +79,3 @@ public abstract class BankAccount {
 		return arrTran;
 	}
 }
-
-
-
-
-
-
-
-
-
-

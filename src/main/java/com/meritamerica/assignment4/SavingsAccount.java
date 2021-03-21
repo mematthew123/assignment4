@@ -7,7 +7,7 @@ import java.util.*;
 
 public class SavingsAccount extends BankAccount {
 	
-	double interestRate = .01;
+	double interestRate = 0.0001;
 //constructor method//
 	public SavingsAccount(double openingBalance, double interestRate){
 		super(openingBalance, interestRate);

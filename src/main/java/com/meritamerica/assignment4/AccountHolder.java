@@ -59,7 +59,7 @@ public class AccountHolder implements Comparable<AccountHolder> {
 		} catch (Exception e) {
 			System.out.println("Your combined balance limit has been reached.");
 		}
-		CheckingAccount chk = new CheckingAccount(0, .0001);
+		CheckingAccount chk = new CheckingAccount(0, .01);
 		return chk;
 	}
 
@@ -121,7 +121,7 @@ public class AccountHolder implements Comparable<AccountHolder> {
 				throw ExceedsCombinedBalanceLimitException("Combined balance limit exeeds $250,000.");
 			}
 			
-			SavingsAccount sav = new SavingsAccount(0, .0001);
+			SavingsAccount sav = new SavingsAccount(0, .01);
 			DepositTransaction depositTransaction = new DepositTransaction(sav, openingBalance);
 			MeritBank.processTransaction(depositTransaction);
 			return sav;
@@ -276,14 +276,19 @@ public class AccountHolder implements Comparable<AccountHolder> {
 	}
 
 	static AccountHolder readFromString(String accountHolderData) throws Exception {
-		AccountHolder ah;
+		
+		AccountHolder acctHolder;
+
 		try {
 			ArrayList<String> x = new ArrayList<>(Arrays.asList(accountHolderData.split(",")));
-			ah = new AccountHolder(x.get(0), x.get(1), x.get(2), x.get(3));
+
+			acctHolder = new AccountHolder(x.get(0), x.get(1), x.get(2), x.get(3));
+			System.out.println(x.get(0) + x.get(1) + x.get(2) + x.get(3));
 		} catch (Exception ex) {
+		
 			throw new java.lang.Exception();
 		}
-		return ah;
+		return acctHolder;
 	}
 
 	public int compareTo(AccountHolder otherAccountHolder) {
