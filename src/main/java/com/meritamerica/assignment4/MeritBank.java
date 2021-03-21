@@ -101,10 +101,20 @@ public class MeritBank {
 
 		return true;
 	}
-
 	static boolean writeToFile(String fileName) {
+		 new HashSet<String>();
+	    try(Scanner sc = new Scanner(new FileReader(fileName))) {
+	      setNextAccountNumber(0); 
+	      setNextAccountNumber(Long.parseLong(sc.next()));
+	       
+		
+		
 		// TODO Should also write BankAccount transactions and the FraudQueue
-		return false;
+		return false;  } catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+			return false;
 	}
 
 	static void addAccountHolder(AccountHolder accountHolder) {
