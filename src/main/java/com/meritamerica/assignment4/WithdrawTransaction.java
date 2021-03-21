@@ -26,7 +26,7 @@ public class WithdrawTransaction extends Transaction{
 		}
 		else
 		{
-			targetAccount.deposit(amount);
+			targetAccount.withdraw(amount);
 		}
 	}
 }

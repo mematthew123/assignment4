@@ -14,17 +14,20 @@ public class MeritBank {
 	static AccountHolder[] accountHolders;
 	static CDOffering[] CDOfferingsArray = new CDOffering[0];
 
-	static boolean readFromFile(String fileName) {
-		
-		
-		
-		clearCDOfferings();
-		accountHolders = new AccountHolder[0];
+	
 
-		try {
-			BufferedReader rd = new BufferedReader(new FileReader(fileName));
-			System.out.println("MeritBank.java");
-			System.out.println(fileName);
+
+		static boolean readFromFile(String fileName) {
+			
+			
+			
+			clearCDOfferings();
+			accountHolders = new AccountHolder[0];
+
+			try {
+				BufferedReader rd = new BufferedReader(new FileReader(fileName));
+				System.out.println("MeritBank.java");
+				System.out.println(fileName);
 // read account number
 			long num = Long.parseLong(rd.readLine().trim());
 			System.out.println("\nNext Account: " + num);
@@ -62,6 +65,15 @@ public class MeritBank {
 
 // making our checking account transactions
 						Transaction tran = Transaction.readFromString(rd.readLine().trim());
+//						try {
+//							tran.process();
+//						} catch (NegativeAmountException nae) {
+//							
+//						} catch (ExceedsAvailableBalanceException eabe) {
+//							
+//						} catch (ExceedsFraudSuspicionLimitException efsle) {
+//							// insert into FraudQueue
+//						}
 						acArr[x].checkingArray.get(c).addTransaction(tran);
 					}
 				}
@@ -74,6 +86,7 @@ public class MeritBank {
 					int numTran = Integer.parseInt(rd.readLine().trim());
 					for (int t = 0; t < numTran; t++) {
 						Transaction tran = Transaction.readFromString(rd.readLine().trim());
+						
 						acArr[x].savingsArray.get(s).addTransaction(tran);
 					}
 				}
@@ -85,10 +98,12 @@ public class MeritBank {
 					int numTran = Integer.parseInt(rd.readLine().trim());
 					for (int t = 0; t < numTran; t++) {
 						Transaction tran = Transaction.readFromString(rd.readLine().trim());
+						
 						acArr[x].cdAccountArray.get(d).addTransaction(tran);
 					}
 				}
 				addAccountHolder(acArr[x]);
+				
 			}
 			rd.close();
 		} catch (IOException e) {
@@ -102,28 +117,44 @@ public class MeritBank {
 			return false;
 		}
 
-		return true;
-	}
+
+		return true;  }
+
+
 
 	
 	// throws fraud exception for transactoions Write File
-	static boolean writeToFile(String fileName) {
-		
-		
+    public static boolean writeToFile(String fileName){
+        StringBuilder result = new StringBuilder(accountNumber + "\n");
+
+        result.append(CDOfferingsArray.length).append("\n");
+        for (CDOffering cdOffering : CDOfferingsArray) result.append(cdOffering.toString()).append("\n");
+
+        result.append(accountHolders.length).append("\n");
+        for (AccountHolder accountHolder : accountHolders) result.append(accountHolder.toString());
+
         Transaction trans = FraudQueue.getTransaction();
         ArrayList<Transaction> transList = new ArrayList<>();
         while (trans != null){
             transList.add(trans);
-            FraudQueue.getTransaction();		// TODO Should also write BankAccount transactions and the FraudQueue
-		return false;
+            trans = FraudQueue.getTransaction();
         }
-		return false;
-	}
 
-	
+        result.append(transList.size()).append("\n");
+        for (Transaction currentTrans : transList) result.append(currentTrans.writeToString()).append("\n");
 
-	
-	
+        try(FileWriter fr = new FileWriter(fileName)){
+            fr.write(result.toString());
+        } catch (IOException e){
+            return false;
+        }
+
+        return true;
+    }
+    
+    
+    
+    
 	static void addAccountHolder(AccountHolder accountHolder) {
 		AccountHolder[] temp = Arrays.copyOf(accountHolders, accountHolders.length + 1);
 		accountHolders = temp;
