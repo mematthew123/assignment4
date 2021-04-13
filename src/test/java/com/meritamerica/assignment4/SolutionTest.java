@@ -342,7 +342,7 @@ public class SolutionTest {
     	assertEquals(11, MeritBank.getNextAccountNumber());
     	assertEquals(3, MeritBank.getCDOfferings().length);
     	
-    	AccountHolder[] sortedAccountHolders = MeritBank.sortedAccountHolders();    	
+    	AccountHolder[] sortedAccountHolders = MeritBank.sortAccountHolders();    	
     	
     	assertEquals(2051.0, sortedAccountHolders[0].getCombinedBalance(), 0);
     	assertEquals(2560.0, sortedAccountHolders[1].getCombinedBalance(), 0);

@@ -82,7 +82,7 @@ public abstract class Transaction
 				}
 				if (source < 0 && amount < 0)
 				{
-					wit = new WithdrawTransaction(MeritBank.getBankAccount(target), amount);
+					wit = new WithdrawTransaction(MeritBank.getBankAccount(target), -amount);
 					wit.setTransactionDate(date);
 					return wit;
 				}

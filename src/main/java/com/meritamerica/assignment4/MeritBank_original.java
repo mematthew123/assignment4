@@ -1,11 +1,12 @@
 package com.meritamerica.assignment4;
+//package com.meritamerica.assignment4;
 
 import java.io.*;
 //import java.lang.reflect.Array;
 import java.text.ParseException;
 import java.util.*;
 
-public class MeritBank {
+public class MeritBank_original {
 
 	static FraudQueue fraud;
 	static String[] accountData = new String[24];
@@ -13,25 +14,23 @@ public class MeritBank {
 	static AccountHolder[] accountHolders;
 	static CDOffering[] CDOfferingsArray = new CDOffering[0];
 
-	static AccountHolder[] sortedAccountHolders() {
-		Arrays.sort(accountHolders);
-
-		return accountHolders;
-	}
 	
-	static boolean readFromFile(String fileName) {
-		clearCDOfferings();
-//		accountHolders = new AccountHolder[0];
-//		Set<String> stringTransactions = new HashSet<>();
-		List<String> stringTransactions = new ArrayList<>();
 
-		try {
-			BufferedReader rd = new BufferedReader(new FileReader(fileName));
-			System.out.println("MeritBank.java");
-			System.out.println(fileName);
+
+		static boolean readFromFile(String fileName) {
+			
+			
+			
+			clearCDOfferings();
+			accountHolders = new AccountHolder[0];
+
+			try {
+				BufferedReader rd = new BufferedReader(new FileReader(fileName));
+				System.out.println("MeritBank.java");
+				System.out.println(fileName);
 // read account number
 			long num = Long.parseLong(rd.readLine().trim());
-			System.out.println("\nNext Account Number is: " + num);
+			System.out.println("\nNext Account: " + num);
 			setNextAccountNumber(num);
 
 // read number of CD Offerings in an Array
@@ -46,30 +45,36 @@ public class MeritBank {
 // reads number of account holders
 			int acctHolder = Integer.parseInt(rd.readLine().trim());
 			System.out.println("Account Holders: " + acctHolder);
-			accountHolders = new AccountHolder[acctHolder];
-//			AccountHolder[] acArr = new AccountHolder[acctHolder];
+			AccountHolder[] acArr = new AccountHolder[acctHolder];
+			for (int x = 0; x < acArr.length; x++) {
 
-			for (int x = 0; x < accountHolders.length; x++) {
 // reads account holder info
-				accountHolders[x] = AccountHolder.readFromString(rd.readLine().trim());
+				acArr[x] = AccountHolder.readFromString(rd.readLine().trim());
 
 // reads number of checking accounts
 				int numChk = Integer.parseInt(rd.readLine().trim());
-				//addAccountHolder(acArr[x]);
-//				System.out.println("Number of Checking Accounts: " + numChk);
-
 				for (int c = 0; c < numChk; c++) {
-// add checking accounts
+
+// making our checking accounts
 					CheckingAccount chk = CheckingAccount.readFromString(rd.readLine().trim());
-					accountHolders[x].addCheckingAccount(chk);
+					acArr[x].addCheckingAccount(chk);
 
 // reads checking account transactions
 					int numTran = Integer.parseInt(rd.readLine().trim());
 					for (int t = 0; t < numTran; t++) {
 
-// making four checking account transactions: 
-// no violation | negative amount | withdrawal exceeds available balance | over $1,000 limit-->fraud 
-						stringTransactions.add(rd.readLine().trim());
+// making our checking account transactions
+						Transaction tran = Transaction.readFromString(rd.readLine().trim());
+//						try {
+//							tran.process();
+//						} catch (NegativeAmountException nae) {
+//							
+//						} catch (ExceedsAvailableBalanceException eabe) {
+//							
+//						} catch (ExceedsFraudSuspicionLimitException efsle) {
+//							// insert into FraudQueue
+//						}
+						acArr[x].checkingArray.get(c).addTransaction(tran);
 					}
 				}
 
@@ -77,47 +82,34 @@ public class MeritBank {
 				int numSav = Integer.parseInt(rd.readLine().trim());
 				for (int s = 0; s < numSav; s++) {
 					SavingsAccount sav = SavingsAccount.readFromString(rd.readLine().trim());
-					accountHolders[x].addSavingsAccount(sav);
+					acArr[x].addSavingsAccount(sav);
 					int numTran = Integer.parseInt(rd.readLine().trim());
 					for (int t = 0; t < numTran; t++) {
-						stringTransactions.add(rd.readLine().trim());
+						Transaction tran = Transaction.readFromString(rd.readLine().trim());
+						
+						acArr[x].savingsArray.get(s).addTransaction(tran);
 					}
 				}
 // CD Account
 				int numCD = Integer.parseInt(rd.readLine().trim());
 				for (int d = 0; d < numCD; d++) {
 					CDAccount cdA = CDAccount.readFromString(rd.readLine().trim());
-					accountHolders[x].addCDAccount(cdA);
+					acArr[x].addCDAccount(cdA);
 					int numTran = Integer.parseInt(rd.readLine().trim());
 					for (int t = 0; t < numTran; t++) {
-						stringTransactions.add(rd.readLine().trim());
+						Transaction tran = Transaction.readFromString(rd.readLine().trim());
+						
+						acArr[x].cdAccountArray.get(d).addTransaction(tran);
 					}
 				}
+				addAccountHolder(acArr[x]);
+				
 			}
 			rd.close();
-			int count = 0;
-			for (String stringTransaction : stringTransactions) {
-				
-				try {
-					count++;
-					System.out.println(stringTransaction);
-					Transaction transaction = Transaction.readFromString(stringTransaction);
-					transaction.process();
-//					if (count == 7)
-//						break;
-				} catch (NegativeAmountException nae) {
-					nae.printStackTrace();
-				} catch (ExceedsAvailableBalanceException eabe) {
-					eabe.printStackTrace();
-				} catch (ExceedsFraudSuspicionLimitException efsle) {
-					efsle.printStackTrace();
-				} catch (Exception ex) {
-					ex.printStackTrace();
-				}
-			}
 		} catch (IOException e) {
 			return false;
 		} catch (ParseException e) {
+
 			return false;
 		} catch (java.lang.NumberFormatException e) {
 			return false;
@@ -125,14 +117,44 @@ public class MeritBank {
 			return false;
 		}
 
-		return true;
-	}
 
-	static boolean writeToFile(String fileName) {
-		// TODO Should also write BankAccount transactions and the FraudQueue
-		return false;
-	}
+		return true;  }
 
+
+
+	
+	// throws fraud exception for transactoions Write File
+    public static boolean writeToFile(String fileName){
+        StringBuilder result = new StringBuilder(accountNumber + "\n");
+
+        result.append(CDOfferingsArray.length).append("\n");
+        for (CDOffering cdOffering : CDOfferingsArray) result.append(cdOffering.toString()).append("\n");
+
+        result.append(accountHolders.length).append("\n");
+        for (AccountHolder accountHolder : accountHolders) result.append(accountHolder.toString());
+
+        Transaction trans = FraudQueue.getTransaction();
+        ArrayList<Transaction> transList = new ArrayList<>();
+        while (trans != null){
+            transList.add(trans);
+            trans = FraudQueue.getTransaction();
+        }
+
+        result.append(transList.size()).append("\n");
+        for (Transaction currentTrans : transList) result.append(currentTrans.writeToString()).append("\n");
+
+        try(FileWriter fr = new FileWriter(fileName)){
+            fr.write(result.toString());
+        } catch (IOException e){
+            return false;
+        }
+
+        return true;
+    }
+    
+    
+    
+    
 	static void addAccountHolder(AccountHolder accountHolder) {
 		AccountHolder[] temp = Arrays.copyOf(accountHolders, accountHolders.length + 1);
 		accountHolders = temp;
@@ -217,7 +239,7 @@ public class MeritBank {
 		return futureValue;
 	}
 
-	static AccountHolder[] sortAccountHolders() {
+	static AccountHolder[] sortedAccountHolders() {
 		Arrays.sort(accountHolders);
 
 		return accountHolders;
@@ -233,16 +255,30 @@ public class MeritBank {
 	 * @return
 	 */
 	public static double recursiveFutureValue(double balance, int years, double interestRate) {
-
+//		double interRate = 0.01;
+//		public static double recursiveFutureValue(double balance, double intr, int term){
 		if (years == 0)
 			return balance;
 		else {
-//			System.out.print(years + "  " + balance);
+			System.out.println("\nRam's fix: ");
+			System.out.print(years + "  " + balance);
 			balance = balance * (1 + interestRate);
-//			System.out.println("  " + balance);
+			System.out.println("  " + balance);
 			return recursiveFutureValue(balance, --years, interestRate);
 		}
 	}
+//			years--;
+//			balance = balance + recursiveFutureValue(balance, years, interestRate);
+//			balance = balance + (balance * interestRate * years);
+
+//			System.out.println("Balance: " + balance);
+//			System.out.println("Years: " + years);
+//			System.out.println("intRate: " + interestRate);
+
+//			return (1+interestRate)*recursiveFutureValue(balance, years-1, interestRate);
+
+//		return balance;
+//		
 
 	public static boolean processTransaction(Transaction transaction)
 			throws NegativeAmountException, ExceedsAvailableBalanceException, ExceedsFraudSuspicionLimitException {
@@ -268,7 +304,7 @@ public class MeritBank {
 
 	public static BankAccount getBankAccount(long accountId) {
 
-		if (accountId > 0) {
+		if (accountId == 0) {
 
 			for (AccountHolder a : MeritBank.getAccountHolders()) {
 				for (BankAccount b : a.getCheckingAccounts()) {
@@ -284,10 +320,10 @@ public class MeritBank {
 						return b;
 				}
 			}
+//			return null;
 		}
 		return null;
 
 	}
 
 }
- 
