@@ -22,7 +22,7 @@ public class CDOffering {
 		return interestRate;
 	}
 	
-	static CDOffering readFromString(String cdOfferingDataString)
+	public static CDOffering readFromString(String cdOfferingDataString)
 	{
 		CDOffering cdo;
 		
